@@ -38,6 +38,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm test
       - run: pnpm build
+      - name: Validate deployment scripts
+        run: bash -n deploy/hostinger-setup.sh deploy/hostinger-deploy.sh deploy/hostinger-rollback.sh
       - name: Validate isolated Hostinger Compose
         run: |
           cp deploy/.env.production.example .env.production
