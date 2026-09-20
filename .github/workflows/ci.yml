@@ -1,0 +1,40 @@
+name: PURPO quality gates
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env: { POSTGRES_USER: purpo, POSTGRES_PASSWORD: purpo, POSTGRES_DB: purpo }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U purpo" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    env:
+      DATABASE_URL: postgresql://purpo:purpo@localhost:5432/purpo
+      REDIS_URL: redis://localhost:6379
+      SESSION_SECRET: ci-session-secret-that-is-at-least-32-characters
+      ENCRYPTION_MASTER_KEY: Y2ktZW5jcnlwdGlvbi1rZXktZXhhY3RseS0zMmJ5dGVzISE=
+      S3_ENDPOINT: http://localhost:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: purpo
+      S3_ACCESS_KEY: ci
+      S3_SECRET_KEY: ci-secret
+      S3_PUBLIC_URL: http://localhost:9000/purpo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11.19.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma migrate deploy
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build

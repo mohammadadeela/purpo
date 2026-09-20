@@ -1,0 +1,7 @@
+import { requireUser } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { enforceSameOrigin, HttpError, jsonError } from "@/lib/http";
+import { settleReservation } from "@/lib/credits";
+
+export async function GET(_:Request,context:{params:Promise<{jobId:string}>}){try{const user=await requireUser();const {jobId}=await context.params;const job=await db.job.findUnique({where:{id:jobId},include:{reservations:{include:{wallet:true}}}});if(!job||!job.reservations.some((r)=>r.wallet.userId===user.id))throw new HttpError(404,"Job not found.","JOB_NOT_FOUND");return Response.json({job})}catch(error){return jsonError(error)}}
+export async function DELETE(request:Request,context:{params:Promise<{jobId:string}>}){try{enforceSameOrigin(request);const user=await requireUser();const {jobId}=await context.params;const job=await db.job.findUnique({where:{id:jobId},include:{reservations:{include:{wallet:true}}}});if(!job||!job.reservations.some((r)=>r.wallet.userId===user.id))throw new HttpError(404,"Job not found.","JOB_NOT_FOUND");if(["COMPLETED","FAILED","CANCELLED"].includes(job.status))throw new HttpError(409,"This job already finished.","JOB_FINISHED");const updated=await db.job.update({where:{id:job.id},data:{status:"CANCELLED",completedAt:new Date(),errorMessage:"Cancelled by user. Provider costs already consumed may not be refundable."}});if(job.status==="QUEUED"&&job.reservations[0])await settleReservation(job.reservations[0].id,0,`job:${job.id}:cancelled`);return Response.json({job:updated})}catch(error){return jsonError(error)}}
