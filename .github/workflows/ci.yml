@@ -38,3 +38,11 @@ jobs:
       - run: pnpm lint
       - run: pnpm test
       - run: pnpm build
+      - name: Validate isolated Hostinger Compose
+        run: |
+          cp deploy/.env.production.example .env.production
+          docker compose --env-file .env.production --project-name purpo_ci -f deploy/hostinger-compose.yml config >/dev/null
+      - name: Build production web image
+        run: docker build --target web -t purpo-web:ci .
+      - name: Build production worker image
+        run: docker build --target worker -t purpo-worker:ci .

@@ -1,9 +1,11 @@
+# Create a NEW site file for PURPO; do not replace the global nginx.conf or another site's vhost.
 server {
   listen 80;
   server_name purpo.example.com;
   client_max_body_size 20m;
+
   location / {
-    proxy_pass http://127.0.0.1:3000;
+    proxy_pass http://127.0.0.1:3187;
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;

@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: purpo
+      POSTGRES_USER: purpo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U purpo -d purpo"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [purpo]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [purpo]
+
+  web:
+    image: purpo-web:${PURPO_IMAGE_TAG:-local}
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: web
+    restart: unless-stopped
+    init: true
+    env_file:
+      - ../.env.production
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://purpo:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/purpo?schema=public
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - 127.0.0.1:${PURPO_WEB_PORT:-3187}:3000
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks: [purpo]
+
+  worker:
+    image: purpo-worker:${PURPO_IMAGE_TAG:-local}
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: worker
+    restart: unless-stopped
+    init: true
+    env_file:
+      - ../.env.production
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://purpo:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/purpo?schema=public
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [purpo]
+
+volumes:
+  postgres_data:
+    name: ${PURPO_STACK_NAME:-purpo_prod}_postgres_data
+  redis_data:
+    name: ${PURPO_STACK_NAME:-purpo_prod}_redis_data
+
+networks:
+  purpo:
+    name: ${PURPO_STACK_NAME:-purpo_prod}_network
