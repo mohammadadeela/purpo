@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { enforceSameOrigin, jsonError } from "@/lib/http";
 import { estimateCredits, reserveCredits, settleReservation } from "@/lib/credits";
 import { initializeBuildStages } from "@/lib/build-agent";
-import { buildQueue } from "@/lib/queue";
+import { getBuildQueue } from "@/lib/queue";
 
 const schema = z.object({ name: z.string().trim().min(2).max(100), objective: z.string().trim().min(12).max(8000), purpose: z.string().trim().max(240).optional() });
 
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     reservationId = reservation.id;
     const jobKey = `build:${buildId}`;
     await db.job.create({ data: { buildId, type: "build", idempotencyKey: jobKey, payload: { buildId } } });
-    await buildQueue.add("build", { buildId }, { jobId: jobKey });
+    await getBuildQueue().add("build", { buildId }, { jobId: jobKey });
     return Response.json({ project: result.project, build: result.build, redirect: `/workspace/${result.project.id}/build` }, { status: 201 });
   } catch (error) {
     if (buildId) await db.build.update({ where: { id: buildId }, data: { status: "FAILED", errorCode: "QUEUE_UNAVAILABLE", errorMessage: "The build queue could not accept this task. Reserved credits were released." } }).catch(() => undefined);

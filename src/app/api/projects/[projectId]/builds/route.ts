@@ -3,7 +3,7 @@ import { requireProject } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { estimateCredits, reserveCredits, settleReservation } from "@/lib/credits";
 import { initializeBuildStages } from "@/lib/build-agent";
-import { buildQueue } from "@/lib/queue";
+import { getBuildQueue } from "@/lib/queue";
 import { enforceSameOrigin, jsonError } from "@/lib/http";
 
 const schema = z.object({ request: z.string().trim().min(3).max(8000) });
@@ -24,7 +24,7 @@ export async function POST(request: Request, context: { params: Promise<{ projec
     reservationId = reservation.id;
     const jobKey = `build:${build.id}`;
     await db.job.create({ data: { buildId: build.id, type: "build", idempotencyKey: jobKey, payload: { buildId: build.id } } });
-    await buildQueue.add("build", { buildId: build.id }, { jobId: jobKey });
+    await getBuildQueue().add("build", { buildId: build.id }, { jobId: jobKey });
     await db.message.create({ data: { conversationId: (await db.conversation.findFirstOrThrow({ where: { projectId }, orderBy: { createdAt: "asc" } })).id, userId: user.id, role: "user", content: input.request } });
     return Response.json({ build }, { status: 202 });
   } catch (error) {
