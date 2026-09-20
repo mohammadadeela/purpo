@@ -1,15 +1,119 @@
 import Link from "next/link";
+import {
+  Archive,
+  Bell,
+  Boxes,
+  CircleHelp,
+  Coins,
+  FolderKanban,
+  Home as HomeIcon,
+  Images,
+  LayoutTemplate,
+  Plus,
+  Search,
+  Settings,
+  Sparkles,
+  WandSparkles
+} from "lucide-react";
 import { Logo } from "@/components/logo";
 import { HomeIdea } from "@/components/home-idea";
 
+const templates = [
+  { name: "Orbit analytics", kind: "Dashboard", tone: "purple" },
+  { name: "Forma studio", kind: "Portfolio", tone: "sand" },
+  { name: "Daily focus", kind: "Productivity", tone: "mint" },
+  { name: "Launchpad", kind: "SaaS", tone: "blue" }
+];
+
+function TemplatePreview({ tone }: { tone: string }) {
+  return <div className={`purpo-template-preview ${tone}`}>
+    <div className="purpo-mini-window">
+      <div className="purpo-mini-top"><i/><i/><i/></div>
+      <div className="purpo-mini-layout">
+        <div className="purpo-mini-side"/>
+        <div className="purpo-mini-content">
+          <span className="wide"/><span/><div className="purpo-mini-cards"><b/><b/><b/></div>
+        </div>
+      </div>
+    </div>
+  </div>;
+}
+
 export default function Home() {
-  const capabilities = [
-    ["Product intelligence", "Understands the complete product behind your request—and remembers every decision."],
-    ["Real software", "Builds frontend, backend, data, authentication, roles, integrations, and tests as one system."],
-    ["Creative studio", "Creates project-ready images, video workflows, brand assets, and campaign material."],
-    ["Live preview", "Use the real interactive project while PURPO builds and updates it."],
-    ["Automation", "Turn plain-language workflows into durable triggers, conditions, and actions."],
-    ["Ship with confidence", "Version, inspect, test, deploy, monitor, and roll back from the same workspace."]
-  ];
-  return <main><header className="container topbar"><Logo/><nav className="nav-links" aria-label="Main navigation"><a href="#product">Product</a><a href="#how">How it works</a><Link href="/login">Sign in</Link><Link className="button" href="/signup">Build with PURPO</Link></nav></header><section className="hero"><div className="container hero-copy"><span className="eyebrow">AI-native product studio</span><h1>Describe the outcome.<br/><span>Build the system.</span></h1><p className="hero-sub">One idea becomes a designed, coded, database-backed, tested, deployable product—with media and automation built in.</p><HomeIdea/><div className="product-flow" aria-label="Build process">{["Idea","Plan","Design","Code","Data","Media","Live app"].map((step, i) => <div key={step} className={`flow-step ${i === 6 ? "active" : ""}`}>{step}</div>)}</div></div></section><section id="product" className="section dark"><div className="container"><div className="section-head"><h2>A serious product team, inside one workspace.</h2><p>PURPO doesn’t generate a page and disappear. It keeps the product context, performs the work in recoverable stages, and shows you exactly what changed.</p></div><div className="capability-grid">{capabilities.map(([title, copy], index) => <article className="capability" key={title}><small>0{index + 1}</small><div><h3>{title}</h3><p>{copy}</p></div></article>)}</div></div></section><section id="how" className="section dark"><div className="container"><div className="section-head"><h2>Watch the product become real.</h2><p>Preview, code, files, data, assets, integrations, automations, deployment, and build activity stay connected.</p></div><div className="workspace-demo"><div className="demo-bar"><span className="demo-dot"/><span className="demo-dot"/><span className="demo-dot"/><span style={{marginLeft: 10}}>Maison / Production preview</span></div><div className="demo-grid"><div className="demo-pane"><Logo compact/><div className="demo-list">{[70,88,62,76,54,82].map((width, i) => <div key={i} className="demo-line" style={{width: `${width}%`}} />)}</div></div><div className="demo-preview"><span className="eyebrow">New collection</span><h3>Quiet form. Strong character.</h3><p>Designed objects for considered spaces.</p><div className="mini-button"/></div><div className="demo-pane"><small>BUILD ACTIVITY</small><div className="status-list">{["Product plan complete","Design system created","Storefront connected","Database validated","Preview ready"].map((item) => <div className="status" key={item}><i/><span>{item}</span></div>)}</div></div></div></div></div></section><footer className="section"><div className="container section-head"><div><Logo/><h2 style={{marginTop: 32}}>What do you want to build?</h2></div><Link className="button violet" href="/signup">Start with 40 credits</Link></div></footer><script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({"@context":"https://schema.org","@type":"SoftwareApplication",name:"PURPO",applicationCategory:"DeveloperApplication",operatingSystem:"Web"})}}/></main>;
+  return <div className="prototype-shell">
+    <aside className="prototype-sidebar">
+      <div className="prototype-brand-row"><Logo/><button className="prototype-workspace-switch" aria-label="Switch workspace">⌄</button></div>
+      <Link className="prototype-new-project" href="/signup"><Plus size={15}/> New project</Link>
+
+      <nav className="prototype-nav" aria-label="Product navigation">
+        <Link className="prototype-nav-item active" href="/"><HomeIcon size={16}/> Home</Link>
+        <Link className="prototype-nav-item" href="/login"><FolderKanban size={16}/> My projects</Link>
+        <a className="prototype-nav-item" href="#templates"><LayoutTemplate size={16}/> Templates</a>
+        <Link className="prototype-nav-item" href="/login"><Images size={16}/> Asset library</Link>
+        <span className="prototype-nav-label">Workspace</span>
+        <Link className="prototype-nav-item" href="/login"><Coins size={16}/> Usage & credits</Link>
+        <Link className="prototype-nav-item" href="/login"><Boxes size={16}/> Integrations</Link>
+        <Link className="prototype-nav-item" href="/login"><Archive size={16}/> Archive</Link>
+      </nav>
+
+      <div className="prototype-sidebar-bottom">
+        <Link className="prototype-nav-item" href="/support"><CircleHelp size={16}/> Help & shortcuts</Link>
+        <Link className="prototype-nav-item" href="/settings"><Settings size={16}/> Settings</Link>
+        <Link className="prototype-account-card" href="/login">
+          <span className="prototype-avatar">M</span>
+          <span><strong>My workspace</strong><small>Personal account</small></span>
+        </Link>
+      </div>
+    </aside>
+
+    <main className="prototype-main">
+      <header className="prototype-topbar">
+        <div className="prototype-mobile-brand"><Logo/></div>
+        <span className="prototype-crumb">Workspace <small>Home</small></span>
+        <div className="prototype-search"><Search size={14}/><span>Search anything...</span><kbd>⌘ K</kbd></div>
+        <button className="prototype-icon-button" aria-label="What's new"><Sparkles size={16}/></button>
+        <button className="prototype-icon-button" aria-label="Notifications"><Bell size={16}/></button>
+        <Link className="prototype-signin" href="/login">Sign in</Link>
+      </header>
+
+      <div className="prototype-content">
+        <div className="prototype-page">
+          <section className="prototype-home-hero">
+            <div className="prototype-orb"><WandSparkles size={23}/></div>
+            <div className="prototype-kicker">A space for your next big idea</div>
+            <h1>What will you create?</h1>
+            <p>Websites, apps, images, videos. One idea is all it takes.</p>
+            <HomeIdea/>
+          </section>
+
+          <section className="prototype-section">
+            <div className="prototype-section-row">
+              <div><h2>Your workspace</h2><p>Projects, context, media and launches stay together.</p></div>
+              <Link href="/login">View all projects</Link>
+            </div>
+            <div className="prototype-empty-projects">
+              <div className="prototype-empty-icon"><Sparkles size={20}/></div>
+              <div><strong>Your ideas will feel at home here.</strong><span>Sign in to save projects, keep history, and continue exactly where you stopped.</span></div>
+              <Link className="prototype-small-button" href="/signup">Start creating</Link>
+            </div>
+          </section>
+
+          <section className="prototype-section" id="templates">
+            <div className="prototype-section-row">
+              <div><span className="prototype-section-kicker">A head start, not a limit</span><h2>Skip the blank canvas.</h2><p>Start with something good. Make it entirely yours.</p></div>
+              <Link href="/signup">Explore templates</Link>
+            </div>
+            <div className="prototype-template-grid">
+              {templates.map((template) => <Link href="/signup" className="prototype-template-card" key={template.name}>
+                <TemplatePreview tone={template.tone}/>
+                <div><strong>{template.name}</strong><span>{template.kind}</span></div>
+              </Link>)}
+            </div>
+          </section>
+
+          <footer className="prototype-home-footer">A little curiosity goes a long way. <span>Made for your imagination.</span></footer>
+        </div>
+      </div>
+    </main>
+  </div>;
 }
