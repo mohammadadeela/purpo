@@ -9,7 +9,7 @@ RUN pnpm install --frozen-lockfile
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm prisma generate && pnpm next build
+RUN ./node_modules/.bin/prisma generate && ./node_modules/.bin/next build
 
 FROM node:22-alpine AS web
 ENV NODE_ENV=production
